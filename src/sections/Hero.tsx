@@ -67,10 +67,12 @@ const Hero = () => {
       scrub: 0.6,
       onUpdate: (self) => {
         const p = self.progress;
-        gsap.set(statue, { y: p * 120 });
-        gsap.set(leftText, { y: p * 200, x: p * -60 });
-        gsap.set(rightText, { y: p * 180, x: p * 60 });
-        gsap.set(badge, { y: p * 80 });
+        gsap.set(statue, { y: p * 160, scale: 1 + p * 0.05 });
+        gsap.set(leftText, { y: p * 240, x: p * -80 });
+        gsap.set(rightText, { y: p * 220, x: p * 80 });
+        gsap.set(badge, { y: p * 120, opacity: 1 - p * 1.5 });
+        gsap.set(nav, { y: p * -40, opacity: 1 - p * 2 });
+        gsap.set(bottom, { y: p * 60, opacity: 1 - p * 2 });
       },
     });
     triggersRef.current.push(scrollTrigger);

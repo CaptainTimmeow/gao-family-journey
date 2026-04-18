@@ -35,6 +35,55 @@ const Visit = () => {
         },
       });
       triggersRef.current.push(trigger);
+
+      // Card parallax
+      const parallaxTrigger = ScrollTrigger.create({
+        trigger: card,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const p = self.progress;
+          gsap.set(card, {
+            y: (p - 0.5) * (i % 2 === 0 ? -25 : 25),
+          });
+        },
+      });
+      triggersRef.current.push(parallaxTrigger);
+
+      // Icon float parallax
+      const icon = card.querySelector('svg');
+      if (icon) {
+        const iconTrigger = ScrollTrigger.create({
+          trigger: card,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.8,
+          onUpdate: (self) => {
+            gsap.set(icon, {
+              y: (self.progress - 0.5) * -15,
+            });
+          },
+        });
+        triggersRef.current.push(iconTrigger);
+      }
+    });
+
+    // Header parallax
+    const headerEls = section.querySelectorAll<HTMLElement>('h2, p');
+    headerEls.forEach((el, i) => {
+      const headerTrigger = ScrollTrigger.create({
+        trigger: section,
+        start: 'top bottom',
+        end: 'top center',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          gsap.set(el, {
+            y: (1 - self.progress) * (20 + i * 10),
+          });
+        },
+      });
+      triggersRef.current.push(headerTrigger);
     });
 
     return () => {

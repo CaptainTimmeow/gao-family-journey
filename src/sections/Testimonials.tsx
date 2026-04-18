@@ -38,6 +38,25 @@ const Testimonials = () => {
       triggersRef.current.push(trigger);
     });
 
+    // Parallax on elements
+    const parallaxEls = content.querySelectorAll<HTMLElement>('.reveal-item');
+    parallaxEls.forEach((el, i) => {
+      const speed = [20, 10, 15, 5][i] || 10;
+      const trigger = ScrollTrigger.create({
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const p = self.progress;
+          gsap.set(el, {
+            y: (p - 0.5) * speed,
+          });
+        },
+      });
+      triggersRef.current.push(trigger);
+    });
+
     return () => {
       triggersRef.current.forEach((t) => t.kill());
       triggersRef.current = [];

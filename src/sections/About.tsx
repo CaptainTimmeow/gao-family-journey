@@ -34,9 +34,9 @@ const About = () => {
 
     if (!section || !text || !gallery || !stats) return;
 
-    // Text reveal
+    // Text reveal with parallax
     const textElements = text.querySelectorAll('.reveal-text');
-    textElements.forEach((el) => {
+    textElements.forEach((el, i) => {
       gsap.set(el, { opacity: 0, y: 50 });
       const trigger = ScrollTrigger.create({
         trigger: el,
@@ -46,11 +46,24 @@ const About = () => {
         },
       });
       triggersRef.current.push(trigger);
+
+      // Parallax drift on text elements
+      const parallaxTrigger = ScrollTrigger.create({
+        trigger: text,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const offset = (i - 1) * 30;
+          gsap.set(el, { x: self.progress * offset });
+        },
+      });
+      triggersRef.current.push(parallaxTrigger);
     });
 
     // Gallery column parallax
     const columns = gallery.querySelectorAll<HTMLElement>('.gallery-col');
-    columns.forEach((col) => {
+    columns.forEach((col, colIndex) => {
       const speed = parseFloat(col.dataset.speed || '0');
       const trigger = ScrollTrigger.create({
         trigger: gallery,
@@ -58,13 +71,17 @@ const About = () => {
         end: 'bottom top',
         scrub: 0.5,
         onUpdate: (self) => {
-          gsap.set(col, { y: self.progress * speed });
+          const p = self.progress;
+          gsap.set(col, {
+            y: p * speed,
+            x: (p - 0.5) * (colIndex - 1) * 20,
+          });
         },
       });
       triggersRef.current.push(trigger);
     });
 
-    // Gallery images: opacity 0.4 -> 1 + slide up
+    // Gallery images: opacity 0.4 -> 1 + slide up + parallax
     const imgWraps = gallery.querySelectorAll<HTMLElement>('.gallery-img-wrap');
     imgWraps.forEach((wrap) => {
       const offset = parseFloat(wrap.dataset.offset || '0');
@@ -80,10 +97,26 @@ const About = () => {
           gsap.set(wrap, {
             opacity: 0.4 + progress * 0.6,
             y: offset * (1 - progress),
+            scale: 0.95 + progress * 0.05,
           });
         },
       });
       triggersRef.current.push(trigger);
+
+      // Inner image parallax
+      const img = wrap.querySelector('img');
+      if (img) {
+        const imgTrigger = ScrollTrigger.create({
+          trigger: wrap,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.8,
+          onUpdate: (self) => {
+            gsap.set(img, { y: (self.progress - 0.5) * 40 });
+          },
+        });
+        triggersRef.current.push(imgTrigger);
+      }
     });
 
     // Stats reveal

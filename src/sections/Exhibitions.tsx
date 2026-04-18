@@ -38,7 +38,7 @@ const Exhibitions = () => {
     });
 
     if (hasContent) {
-      // Card staggered reveal
+      // Card staggered reveal + parallax
       const cards = grid.querySelectorAll<HTMLElement>('.exhibit-card');
       cards.forEach((card, i) => {
         const yOffset = [0, 100, 200, 300][i] || 0;
@@ -58,6 +58,36 @@ const Exhibitions = () => {
           },
         });
         triggersRef.current.push(trigger);
+
+        // Card parallax on scroll
+        const parallaxTrigger = ScrollTrigger.create({
+          trigger: card,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.6,
+          onUpdate: (self) => {
+            const p = self.progress;
+            gsap.set(card, {
+              y: (p - 0.5) * (i % 2 === 0 ? -40 : 40),
+            });
+          },
+        });
+        triggersRef.current.push(parallaxTrigger);
+
+        // Inner image parallax
+        const img = card.querySelector('img');
+        if (img) {
+          const imgTrigger = ScrollTrigger.create({
+            trigger: card,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.8,
+            onUpdate: (self) => {
+              gsap.set(img, { y: (self.progress - 0.5) * 60, scale: 1.1 });
+            },
+          });
+          triggersRef.current.push(imgTrigger);
+        }
       });
     } else {
       // Empty state reveal
