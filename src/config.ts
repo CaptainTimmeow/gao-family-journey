@@ -132,8 +132,8 @@ export const heroConfig: HeroConfig = {
   badge: "Our Journey",
   since: "Est. 2018",
   email: "",
-  heroImage: "/images/xiaodai-1.jpg",
-  heroImageAlt: "Xiaodai - The family Shetland Sheepdog",
+  heroImage: "/images/family-hero.jpg",
+  heroImageAlt: "Roy, Chica, Sean and Xiaodai — 三体科创工作室",
   scrollText: "Scroll to learn more",
   copyrightText: "© 2024 Gao Family",
   navLinks: [

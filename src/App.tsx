@@ -12,6 +12,7 @@ import useCustomCursor from './hooks/useCustomCursor';
 // Sections — Hero loads immediately, everything else lazy
 import Hero from './sections/Hero';
 const About = lazy(() => import('./sections/About'));
+const ChildProfiles = lazy(() => import('./sections/ChildProfiles'));
 const Exhibitions = lazy(() => import('./sections/Exhibitions'));
 const Collections = lazy(() => import('./sections/Collections'));
 const Testimonials = lazy(() => import('./sections/Testimonials'));
@@ -41,6 +42,7 @@ function App() {
     const sections = [
       { selector: '#hero-section', color: '#8c8c91' },
       { selector: '#about', color: '#050505' },
+      { selector: '#children', color: '#050505' },
       { selector: '#exhibitions', color: '#050505' },
       { selector: '#collections', color: '#f0f0f0' },
       { selector: '#testimonials-section', color: '#8c8c91' },
@@ -90,6 +92,9 @@ function App() {
       <Suspense fallback={<div className="min-h-[50vh]" />}>
         {/* About Section */}
         <About />
+
+        {/* Individual Child Profiles */}
+        <ChildProfiles />
 
         {/* Exhibitions Section */}
         <Exhibitions />
