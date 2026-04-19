@@ -150,9 +150,9 @@ export const aboutConfig: AboutConfig = {
   description: "We're the Gao family! Roy, Chica, and Sean are elementary school students working on fun projects together. Our golden retriever Xiaodai is always by our side, bringing joy to everything we do. We're documenting our learning journey as we explore new interests, work on projects, and prepare for the future.",
   bottomText: "This website is a work in progress. Check back soon as we share our real projects and experiences!",
   galleryImages: [
-    { src: "/images/gallery-1.jpg", alt: "Kids studying together", label: "Learning Together" },
-    { src: "/images/gallery-3.jpg", alt: "Playing with Xiaodai", label: "Family Fun" },
-    { src: "/images/gallery-6.jpg", alt: "Family reading time", label: "Reading Time" },
+    { src: "/images/chica-action.jpg", alt: "Chica striking an action pose in the studio surrounded by tech boxes", label: "Studio Life" },
+    { src: "/images/family-camera.jpg", alt: "Roy, Chica, and Sean learning about filmmaking with a Canon camera and gimbal", label: "Filmmaking" },
+    { src: "/images/family-360.jpg", alt: "Fun 360-degree family selfie with Roy, Chica, Sean, and Xiaodai making faces", label: "Fun Moments" },
   ],
   stats: [
     { value: "3", label: "Students" },

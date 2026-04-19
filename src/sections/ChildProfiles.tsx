@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ------------------------------------------------------------------ */
 /*  Individual Child Profile Sections                                  */
-/*  Warm, personal profile cards for Roy, Chica, and Sean             */
+/*  Photo left for boys, photo RIGHT for Chica                        */
 /* ------------------------------------------------------------------ */
 
 interface ChildData {
@@ -33,8 +33,8 @@ const childrenData: ChildData[] = [
     nameZh: 'Roy',
     image: '/images/roy.jpg',
     alt: 'Roy Gao',
-    age: 'Elementary',
-    ageZh: '小学',
+    age: 'G3-G4',
+    ageZh: 'G3-G4',
     tagline: 'The eldest. Curious mind, always building something new.',
     taglineZh: '老大。好奇心强，总是在创造新东西。',
     about:
@@ -50,8 +50,8 @@ const childrenData: ChildData[] = [
     nameZh: 'Chica',
     image: '/images/chica.jpg',
     alt: 'Chica Gao',
-    age: 'Elementary',
-    ageZh: '小学',
+    age: 'G3-G4',
+    ageZh: 'G3-G4',
     tagline: 'The creative soul. Art, music, and stories flow through her.',
     taglineZh: '有创造力的灵魂。艺术、音乐和故事在她身上流淌。',
     about:
@@ -67,8 +67,8 @@ const childrenData: ChildData[] = [
     nameZh: 'Sean',
     image: '/images/sean.jpg',
     alt: 'Sean Gao',
-    age: 'Elementary — youngest',
-    ageZh: '小学 — 最小的',
+    age: 'G3-G4 — youngest',
+    ageZh: 'G3-G4 — 最小的',
     tagline: 'The youngest. Sharp wit, big heart, endless questions.',
     taglineZh: '最小的。机智敏锐，心地善良，问题不断。',
     about:
@@ -88,7 +88,12 @@ const ChildProfile = ({ child, index }: { child: ChildData; index: number }) => 
   const triggersRef = useRef<ScrollTrigger[]>([]);
   const { lang } = useLanguage();
 
-  const isEven = index % 2 === 0;
+  /* Key layout decision:
+   * Roy  (index 0): photo LEFT,  text right
+   * Chica (index 1): photo RIGHT, text left  ← she's different
+   * Sean (index 2): photo LEFT,  text right
+   */
+  const photoOnLeft = index !== 1; // only Chica gets photo on right
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -100,8 +105,8 @@ const ChildProfile = ({ child, index }: { child: ChildData; index: number }) => 
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Set initial states
-    gsap.set(photo, { opacity: 0, x: isEven ? -60 : 60, scale: 0.96 });
+    // Photo enters from its natural side
+    gsap.set(photo, { opacity: 0, x: photoOnLeft ? -60 : 60, scale: 0.96 });
     gsap.set(text.children, { opacity: 0, y: 40 });
 
     const trigger = ScrollTrigger.create({
@@ -127,7 +132,6 @@ const ChildProfile = ({ child, index }: { child: ChildData; index: number }) => 
     });
     triggersRef.current.push(trigger);
 
-    // Parallax on photo while scrolling through section
     if (!prefersReduced) {
       const parallaxTrigger = ScrollTrigger.create({
         trigger: section,
@@ -146,13 +150,78 @@ const ChildProfile = ({ child, index }: { child: ChildData; index: number }) => 
       triggersRef.current.forEach((t) => t.kill());
       triggersRef.current = [];
     };
-  }, [isEven]);
+  }, [photoOnLeft]);
 
   const name = lang === 'zh' ? child.nameZh : child.name;
   const age = lang === 'zh' ? child.ageZh : child.age;
   const tagline = lang === 'zh' ? child.taglineZh : child.tagline;
   const about = lang === 'zh' ? child.aboutZh : child.about;
   const interests = lang === 'zh' ? child.interestsZh : child.interests;
+
+  /* Photo block */
+  const PhotoBlock = (
+    <div ref={photoRef} className="lg:col-span-5 will-change-transform">
+      <div className="relative">
+        <div
+          className="absolute inset-0 rounded-3xl opacity-30"
+          style={{
+            background: `radial-gradient(ellipse 70% 60% at 50% 60%, ${child.color} 0%, transparent 70%)`,
+            transform: 'scale(1.2)',
+            filter: 'blur(50px)',
+          }}
+        />
+        <div className="relative overflow-hidden rounded-2xl">
+          <img
+            src={child.image}
+            alt={child.alt}
+            className="w-full h-auto object-cover"
+            style={{ aspectRatio: '3/4', objectPosition: 'center center' }}
+          />
+        </div>
+        <div
+          className="absolute -bottom-4 left-6 px-5 py-2 rounded-full"
+          style={{
+            background: child.color,
+            boxShadow: `0 8px 30px ${child.color}40`,
+          }}
+        >
+          <span className="museo-headline text-white text-lg">{name}</span>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* Text block */
+  const TextBlock = (
+    <div ref={textRef} className="lg:col-span-7">
+      <p className="museo-label text-white/40 text-[10px] tracking-[0.3em] mb-3">{age}</p>
+      <p className="museo-body text-white/60 text-lg lg:text-xl leading-relaxed mb-6">{tagline}</p>
+      <p className="museo-body text-white/50 text-sm lg:text-base leading-relaxed mb-8 max-w-xl">{about}</p>
+      <div className="flex flex-wrap gap-3 mb-8">
+        {interests.map((interest, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 text-white/70 text-xs"
+          >
+            {i === 0 && <Star size={12} />}
+            {i === 1 && <Heart size={12} />}
+            {i === 2 && <BookOpen size={12} />}
+            {i === 3 && <Compass size={12} />}
+            {interest}
+          </span>
+        ))}
+      </div>
+      <a
+        href="#hero-section"
+        className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors group"
+      >
+        <ArrowUp size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+        <span className="museo-label text-[10px]">
+          {lang === 'zh' ? '返回顶部' : 'Back to top'}
+        </span>
+      </a>
+    </div>
+  );
 
   return (
     <section
@@ -162,97 +231,20 @@ const ChildProfile = ({ child, index }: { child: ChildData; index: number }) => 
       style={{ background: '#050505' }}
     >
       <div className="max-w-6xl mx-auto">
-        <div
-          className={`grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center ${
-            isEven ? '' : 'lg:direction-rtl'
-          }`}
-        >
-          {/* Photo */}
-          <div
-            ref={photoRef}
-            className={`lg:col-span-5 will-change-transform ${isEven ? '' : 'lg:direction-ltr'}`}
-          >
-            <div className="relative">
-              {/* Glow behind photo */}
-              <div
-                className="absolute inset-0 rounded-3xl opacity-30"
-                style={{
-                  background: `radial-gradient(ellipse 70% 60% at 50% 60%, ${child.color} 0%, transparent 70%)`,
-                  transform: 'scale(1.2)',
-                  filter: 'blur(50px)',
-                }}
-              />
-              <div className="relative overflow-hidden rounded-2xl">
-                <img
-                  src={child.image}
-                  alt={child.alt}
-                  className="w-full h-auto object-cover"
-                  style={{
-                    aspectRatio: '3/4',
-                    objectPosition: 'center center',
-                  }}
-                />
-              </div>
-              {/* Name badge */}
-              <div
-                className="absolute -bottom-4 left-6 px-5 py-2 rounded-full"
-                style={{
-                  background: child.color,
-                  boxShadow: `0 8px 30px ${child.color}40`,
-                }}
-              >
-                <span className="museo-headline text-white text-lg">{name}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Text content */}
-          <div
-            ref={textRef}
-            className={`lg:col-span-7 ${isEven ? '' : 'lg:direction-ltr'}`}
-          >
-            {/* Age label */}
-            <p className="museo-label text-white/40 text-[10px] tracking-[0.3em] mb-3">
-              {age}
-            </p>
-
-            {/* Tagline */}
-            <p className="museo-body text-white/60 text-lg lg:text-xl leading-relaxed mb-6">
-              {tagline}
-            </p>
-
-            {/* About */}
-            <p className="museo-body text-white/50 text-sm lg:text-base leading-relaxed mb-8 max-w-xl">
-              {about}
-            </p>
-
-            {/* Interests */}
-            <div className="flex flex-wrap gap-3 mb-8">
-              {interests.map((interest, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 text-white/70 text-xs"
-                >
-                  {i === 0 && <Star size={12} />}
-                  {i === 1 && <Heart size={12} />}
-                  {i === 2 && <BookOpen size={12} />}
-                  {i === 3 && <Compass size={12} />}
-                  {interest}
-                </span>
-              ))}
-            </div>
-
-            {/* Back to top */}
-            <a
-              href="#hero-section"
-              className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors group"
-            >
-              <ArrowUp size={14} className="group-hover:-translate-y-0.5 transition-transform" />
-              <span className="museo-label text-[10px]">
-                {lang === 'zh' ? '返回顶部' : 'Back to top'}
-              </span>
-            </a>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+          {/* For Chica: text first (left), photo second (right)
+              For Roy/Sean: photo first (left), text second (right) */}
+          {photoOnLeft ? (
+            <>
+              {PhotoBlock}
+              {TextBlock}
+            </>
+          ) : (
+            <>
+              {TextBlock}
+              {PhotoBlock}
+            </>
+          )}
         </div>
       </div>
     </section>

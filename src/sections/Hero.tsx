@@ -7,8 +7,7 @@ import { useLanguage } from '../hooks/useLanguage';
 gsap.registerPlugin(ScrollTrigger);
 
 /* ------------------------------------------------------------------ */
-/*  Cinematic Parallax Hero                                            */
-/*  Multi-layer depth with dramatic scroll-driven motion               */
+/*  Cinematic Parallax Hero — Desktop: layered, Mobile: clean flow    */
 /* ------------------------------------------------------------------ */
 
 const prefersReducedMotion = (): boolean =>
@@ -31,7 +30,7 @@ const Hero = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const triggersRef = useRef<ScrollTrigger[]>([]);
 
-  /* Refs for all animated layers */
+  /* Refs for animated layers */
   const bgDeepRef = useRef<HTMLDivElement>(null);
   const bgMidRef = useRef<HTMLDivElement>(null);
   const orbRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -45,6 +44,7 @@ const Hero = () => {
   const vignetteRef = useRef<HTMLDivElement>(null);
   const scrollCueRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const mobileContentRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
     { label: t.navOurStory, href: '#about' },
@@ -84,7 +84,6 @@ const Hero = () => {
     },
   ];
 
-  /* ---------------------------------------------------------------- */
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
@@ -99,7 +98,6 @@ const Hero = () => {
       delay: 0.15,
     });
 
-    // Set all initial states
     gsap.set(bgDeepRef.current, { opacity: 0, scale: 1.1 });
     gsap.set(bgMidRef.current, { opacity: 0 });
     orbRefs.current.forEach((orb, i) => {
@@ -107,11 +105,14 @@ const Hero = () => {
     });
     gsap.set(photoRef.current, { opacity: 0, y: 80, scale: 0.85 });
     gsap.set(photoFrameRef.current, { opacity: 0, scale: 0.9 });
-    gsap.set(headlineRef.current, { opacity: 0, y: 60 });
-    gsap.set(subRef.current, { opacity: 0, y: 40 });
+    gsap.set(headlineRef.current, { opacity: 0, y: 50 });
+    gsap.set(subRef.current, { opacity: 0, y: 25 });
     gsap.set(studioBadgeRef.current, { opacity: 0, scale: 0.8, y: 20 });
     gsap.set(scrollCueRef.current, { opacity: 0, y: 20 });
     gsap.set(vignetteRef.current, { opacity: 0 });
+    if (mobileContentRef.current) {
+      gsap.set(mobileContentRef.current.children, { opacity: 0, y: 30 });
+    }
     if (cardsContainerRef.current) {
       gsap.set(cardsContainerRef.current.children, { opacity: 0, y: 60, scale: 0.9 });
     }
@@ -119,7 +120,6 @@ const Hero = () => {
       gsap.set(particlesRef.current.children, { opacity: 0, scale: 0 });
     }
 
-    // Entrance sequence — coordinated reveal
     entrance
       .to(bgDeepRef.current, { opacity: 1, scale: 1, duration: 1.4 }, 0)
       .to(bgMidRef.current, { opacity: 1, duration: 1.2 }, 0.2)
@@ -143,7 +143,16 @@ const Hero = () => {
       .to(vignetteRef.current, { opacity: 1, duration: 1.0 }, 0.8)
       .to(scrollCueRef.current, { opacity: 1, y: 0, duration: 0.6 }, 1.8);
 
-    /* ---- SCROLL-DRIVEN PARALLAX TIMELINE ---- */
+    /* Mobile content entrance */
+    if (mobileContentRef.current) {
+      gsap.to(mobileContentRef.current.children, {
+        opacity: 1, y: 0, duration: 0.7,
+        stagger: 0.12, ease: 'power3.out',
+        delay: 0.8,
+      });
+    }
+
+    /* ---- SCROLL-DRIVEN TIMELINE ---- */
     if (!reduced) {
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -154,12 +163,13 @@ const Hero = () => {
           scrub: mobile ? 1.8 : 0.8,
           anticipatePin: 1,
           onLeaveBack: () => {
-            // Reset everything when scrolling back to top
-            gsap.set([headlineRef.current, subRef.current], { opacity: 1, y: 0 });
-            gsap.set(photoRef.current, { opacity: 1, y: 0, scale: 1 });
-            gsap.set(photoFrameRef.current, { opacity: 1, scale: 1 });
+            gsap.to([headlineRef.current, subRef.current, photoRef.current], {
+              opacity: 1, y: 0, scale: 1, duration: 0.3,
+            });
             if (cardsContainerRef.current) {
-              gsap.set(cardsContainerRef.current.children, { opacity: 1, x: 0, y: 0, rotation: 0 });
+              gsap.set(cardsContainerRef.current.children, {
+                opacity: 1, x: 0, y: 0, scale: 1, rotation: 0, duration: 0.3,
+              });
             }
           },
         },
@@ -167,121 +177,81 @@ const Hero = () => {
 
       if (scrollTl.scrollTrigger) triggersRef.current.push(scrollTl.scrollTrigger);
 
-      /* Layer 0 — Deep background: moves very slow (0.1x feel) */
+      /* Layer 0 — Deep background */
       scrollTl.fromTo(bgDeepRef.current,
         { y: 0, scale: 1 },
-        { y: -30 * m, scale: 1.08, ease: 'none' },
-        0
-      );
+        { y: -30 * m, scale: 1.08, ease: 'none' }, 0);
 
-      /* Layer 1 — Mid gradient: slow parallax */
+      /* Layer 1 — Mid gradient */
       scrollTl.fromTo(bgMidRef.current,
         { y: 0, opacity: 0.6 },
-        { y: -60 * m, opacity: 0.3, ease: 'none' },
-        0
-      );
+        { y: -60 * m, opacity: 0.3, ease: 'none' }, 0);
 
-      /* Layer 2 — Orbs: each at different speed for depth */
+      /* Layer 2 — Orbs */
       const orbSpeeds = [0.15, 0.25, 0.4, 0.2, 0.35];
       orbRefs.current.forEach((orb, i) => {
         if (!orb) return;
         const dirX = i % 2 === 0 ? -1 : 1;
         scrollTl.fromTo(orb,
           { y: 0, x: 0, scale: 1 },
-          {
-            y: -120 * orbSpeeds[i] * m,
-            x: 40 * dirX * orbSpeeds[i] * m,
-            scale: 1.1 - orbSpeeds[i] * 0.2,
-            ease: 'none',
-          },
-          0
-        );
+          { y: -120 * orbSpeeds[i] * m, x: 40 * dirX * orbSpeeds[i] * m, scale: 1.1 - orbSpeeds[i] * 0.2, ease: 'none' },
+          0);
       });
 
-      /* Layer 3 — Photo frame: medium parallax */
+      /* Layer 3 — Photo frame */
       scrollTl.fromTo(photoFrameRef.current,
         { y: 0, scale: 1 },
-        { y: -50 * m, scale: 1.02, ease: 'none' },
-        0
-      );
+        { y: -50 * m, scale: 1.02, ease: 'none' }, 0);
 
-      /* Layer 4 — Photo itself: dramatic scale + parallax */
+      /* Layer 4 — Photo */
       scrollTl.fromTo(photoRef.current,
         { y: 0, scale: 1 },
-        { y: -100 * m, scale: 1.12, ease: 'none' },
-        0
-      );
+        { y: -100 * m, scale: 1.12, ease: 'none' }, 0);
 
-      /* Layer 5 — Studio badge: gentle float */
+      /* Layer 5 — Studio badge */
       scrollTl.fromTo(studioBadgeRef.current,
         { y: 0, opacity: 1 },
-        { y: -40 * m, opacity: 0.6, ease: 'none' },
-        0
-      );
+        { y: -40 * m, opacity: 0.6, ease: 'none' }, 0);
 
-      /* Layer 6 — Headline: dramatic upward exit */
+      /* Layer 6 — Headline */
       scrollTl.fromTo(headlineRef.current,
         { y: 0, opacity: 1, scale: 1 },
-        { y: -180 * m, opacity: 0, scale: 0.95, ease: 'power2.in' },
-        0.35
-      );
+        { y: -180 * m, opacity: 0, scale: 0.95, ease: 'power2.in' }, 0.35);
 
       scrollTl.fromTo(subRef.current,
         { y: 0, opacity: 1 },
-        { y: -140 * m, opacity: 0, ease: 'power2.in' },
-        0.42
-      );
+        { y: -140 * m, opacity: 0, ease: 'power2.in' }, 0.42);
 
-      /* Layer 7 — Story cards: dramatic fly-in from far away */
+      /* Layer 7 — Story cards */
       if (cardsContainerRef.current) {
         const cards = cardsContainerRef.current.children;
         storyCards.forEach((card, i) => {
           const delay = 0.1 + i * 0.06;
           scrollTl.fromTo(cards[i],
-            {
-              x: card.enterFrom.x * m,
-              y: card.enterFrom.y * m + 40,
-              rotation: card.enterFrom.rotate * m,
-              opacity: 0.2,
-            },
-            {
-              x: 0, y: 0, rotation: 0, opacity: 1,
-              ease: 'power2.out',
-            },
-            delay
-          );
+            { x: card.enterFrom.x * m, y: card.enterFrom.y * m + 40, rotation: card.enterFrom.rotate * m, opacity: 0.2 },
+            { x: 0, y: 0, rotation: 0, opacity: 1, ease: 'power2.out' },
+            delay);
         });
-
-        // Cards exit
-        scrollTl.to(cards,
-          { opacity: 0, y: -80 * m, stagger: 0.02, ease: 'power2.in' },
-          0.75
-        );
+        scrollTl.to(cards, { opacity: 0, y: -80 * m, stagger: 0.02, ease: 'power2.in' }, 0.75);
       }
 
-      /* Layer 8 — Foreground particles: move FAST for depth contrast */
+      /* Layer 8 — Particles */
       if (particlesRef.current) {
         const particles = particlesRef.current.children;
         scrollTl.fromTo(particles,
           { y: 0, opacity: 0.6 },
-          { y: -200 * m, opacity: 0, stagger: 0.02, ease: 'none' },
-          0
-        );
+          { y: -200 * m, opacity: 0, stagger: 0.02, ease: 'none' }, 0);
       }
 
-      /* Layer 9 — Vignette: intensifies then clears */
+      /* Layer 9 — Vignette */
       scrollTl.fromTo(vignetteRef.current,
         { opacity: 1 },
-        { opacity: 0.3, ease: 'none' },
-        0.60
-      );
+        { opacity: 0.3, ease: 'none' }, 0.60);
 
-      /* Scroll cue: fades early */
+      /* Scroll cue */
       scrollTl.fromTo(scrollCueRef.current,
         { opacity: 1 },
-        { opacity: 0, ease: 'none' },
-        0.05
-      );
+        { opacity: 0, ease: 'none' }, 0.05);
     }
 
     /* Nav entrance */
@@ -296,7 +266,6 @@ const Hero = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* Language change flash */
   useEffect(() => {
     gsap.fromTo([headlineRef.current, subRef.current], { opacity: 0.6 }, { opacity: 1, duration: 0.4 });
   }, [lang]);
@@ -305,10 +274,10 @@ const Hero = () => {
     <section
       id="hero-section"
       ref={sceneRef}
-      className="relative w-full overflow-hidden"
-      style={{ height: isTouchDevice() ? 'auto' : '100vh', minHeight: '100dvh' }}
+      className="relative w-full"
+      style={{ minHeight: '100dvh' }}
     >
-      {/* ====== LAYER 0: Deep background ====== */}
+      {/* ====== BACKGROUND LAYERS (shared desktop + mobile) ====== */}
       <div
         ref={bgDeepRef}
         className="absolute inset-0 will-change-transform"
@@ -321,20 +290,15 @@ const Hero = () => {
           `,
         }}
       />
-
-      {/* ====== LAYER 1: Mid gradient overlay ====== */}
       <div
         ref={bgMidRef}
         className="absolute inset-0 will-change-transform"
         style={{
           zIndex: 2,
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,168,130,0.15) 0%, transparent 70%)
-          `,
+          background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,168,130,0.15) 0%, transparent 70%)',
         }}
       />
-
-      {/* ====== LAYER 2: Floating orbs (5, each different) ====== */}
+      {/* Orbs */}
       {[
         { size: 500, top: '-15%', left: '-8%', color: 'rgba(212,187,160,0.12)' },
         { size: 400, top: '55%', right: '-10%', color: 'rgba(184,160,130,0.10)' },
@@ -345,7 +309,7 @@ const Hero = () => {
         <div
           key={i}
           ref={(el) => { orbRefs.current[i] = el; }}
-          className="absolute rounded-full will-change-transform pointer-events-none"
+          className="absolute rounded-full will-change-transform pointer-events-none hidden lg:block"
           style={{
             zIndex: 3,
             width: orb.size,
@@ -360,273 +324,178 @@ const Hero = () => {
         />
       ))}
 
-      {/* ====== LAYER 3: Photo frame glow ====== */}
+      {/* Vignette */}
       <div
-        ref={photoFrameRef}
-        className="absolute will-change-transform"
+        ref={vignetteRef}
+        className="absolute inset-0 pointer-events-none will-change-transform hidden lg:block"
         style={{
-          zIndex: 4,
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 'min(72vw, 640px)',
+          zIndex: 10,
+          background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(28,22,18,0.6) 100%)',
         }}
-      >
-        {/* Outer glow */}
+      />
+
+      {/* ====== DESKTOP: Absolute layers ====== */}
+      <div className="hidden lg:block">
+        {/* Photo frame glow */}
         <div
-          className="absolute inset-0 rounded-2xl"
-          style={{
-            background: `radial-gradient(ellipse 75% 70% at 50% 55%, rgba(196,168,130,0.2) 0%, transparent 70%)`,
-            transform: 'scale(1.25)',
-            filter: 'blur(50px)',
-          }}
-        />
-        {/* Inner border glow */}
-        <div
-          className="absolute inset-[-2px] rounded-2xl"
-          style={{
+          ref={photoFrameRef}
+          className="absolute will-change-transform"
+          style={{ zIndex: 4, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(72vw, 640px)' }}
+        >
+          <div className="absolute inset-0 rounded-2xl" style={{
+            background: 'radial-gradient(ellipse 75% 70% at 50% 55%, rgba(196,168,130,0.2) 0%, transparent 70%)',
+            transform: 'scale(1.25)', filter: 'blur(50px)',
+          }} />
+          <div className="absolute inset-[-2px] rounded-2xl" style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.08) 100%)',
             padding: 2,
-          }}
-        >
-          <div className="w-full h-full rounded-2xl bg-transparent" />
-        </div>
-      </div>
-
-      {/* ====== LAYER 4: Family photo ====== */}
-      <div
-        ref={photoRef}
-        className="absolute will-change-transform"
-        style={{
-          zIndex: 5,
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 'min(70vw, 620px)',
-        }}
-      >
-        <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-          <img
-            src="/images/family-hero.jpg"
-            alt="Roy, Chica, Sean and Xiaodai — The Gao Family"
-            className="w-full h-auto object-cover"
-            style={{ aspectRatio: '4/3' }}
-          />
-          {/* Subtle overlay on photo for text readability */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.1) 100%)',
-            }}
-          />
-        </div>
-
-        {/* Studio badge */}
-        <div
-          ref={studioBadgeRef}
-          className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full flex items-center gap-2 will-change-transform"
-          style={{
-            background: 'rgba(196, 168, 130, 0.9)',
-            boxShadow: '0 8px 30px rgba(196,168,130,0.3), 0 2px 8px rgba(0,0,0,0.2)',
-          }}
-        >
-          <Sparkles size={14} className="text-white/80" />
-          <span className="museo-label text-white text-[10px] tracking-wider">
-            三体科创工作室
-          </span>
-        </div>
-      </div>
-
-      {/* ====== LAYER 6: Typography ====== */}
-      <div
-        className="absolute inset-x-0 flex flex-col items-center text-center px-6 pointer-events-none"
-        style={{ zIndex: 7, top: '4%', paddingBottom: '46vh' }}
-      >
-        {/* Nav */}
-        <nav
-          ref={navRef}
-          className="w-full max-w-7xl flex items-center justify-between mb-6 will-change-transform pointer-events-auto"
-        >
-          <div className="museo-label text-white/60 text-sm tracking-widest">
-            {lang === 'zh' ? '高家' : 'GAO FAMILY'}
+          }}>
+            <div className="w-full h-full rounded-2xl bg-transparent" />
           </div>
-          <div className="flex items-center gap-5">
-            <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link, i) => (
-                <a
-                  key={i}
-                  href={link.href}
-                  className="museo-label text-white/50 hover:text-white transition-colors text-[11px]"
-                >
-                  {link.label}
-                </a>
-              ))}
+        </div>
+
+        {/* Photo */}
+        <div
+          ref={photoRef}
+          className="absolute will-change-transform"
+          style={{ zIndex: 5, top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(70vw, 620px)' }}
+        >
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+            <img src="/images/family-hero.jpg" alt="Roy, Chica, Sean and Xiaodai" className="w-full h-auto object-cover" style={{ aspectRatio: '4/3' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.1) 100%)',
+            }} />
+          </div>
+          {/* Studio badge */}
+          <div ref={studioBadgeRef} className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full flex items-center gap-2 will-change-transform"
+            style={{ background: 'rgba(196, 168, 130, 0.9)', boxShadow: '0 8px 30px rgba(196,168,130,0.3), 0 2px 8px rgba(0,0,0,0.2)' }}>
+            <Sparkles size={14} className="text-white/80" />
+            <span className="museo-label text-white text-[10px] tracking-wider">三体科创工作室</span>
+          </div>
+        </div>
+
+        {/* Typography */}
+        <div className="absolute inset-x-0 flex flex-col items-center text-center px-6 pointer-events-none" style={{ zIndex: 7, top: '4%' }}>
+          <nav ref={navRef} className="w-full max-w-7xl flex items-center justify-between mb-6 will-change-transform pointer-events-auto">
+            <div className="museo-label text-white/60 text-sm tracking-widest">{lang === 'zh' ? '高家' : 'GAO FAMILY'}</div>
+            <div className="flex items-center gap-5">
+              <div className="flex items-center gap-8">
+                {navLinks.map((link, i) => (
+                  <a key={i} href={link.href} className="museo-label text-white/50 hover:text-white transition-colors text-[11px]">{link.label}</a>
+                ))}
+              </div>
+              <button onClick={toggleLang}
+                className="flex items-center gap-2 museo-label text-white/50 hover:text-white transition-colors text-[11px] tracking-wider border border-white/15 hover:border-white/35 rounded-full px-4 py-2"
+                aria-label="Toggle language">
+                <Globe size={14} />{t.langToggle}
+              </button>
             </div>
-            <button
-              onClick={toggleLang}
-              className="flex items-center gap-2 museo-label text-white/50 hover:text-white transition-colors text-[11px] tracking-wider border border-white/15 hover:border-white/35 rounded-full px-4 py-2"
-              aria-label="Toggle language"
-            >
-              <Globe size={14} />
-              {t.langToggle}
+          </nav>
+          <h1 ref={headlineRef} className="museo-headline text-white max-w-2xl will-change-transform mt-3"
+            style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.6rem)', lineHeight: 1.15, letterSpacing: '-0.01em', wordBreak: 'keep-all', textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
+            {t.heroHeadline}
+          </h1>
+          <p ref={subRef} className="museo-body text-white/40 mt-2 max-w-md will-change-transform"
+            style={{ fontSize: 'clamp(0.7rem, 1vw, 0.85rem)', fontWeight: 400, letterSpacing: '0.02em', textShadow: '0 1px 8px rgba(0,0,0,0.2)' }}>
+            {t.heroSubheading}
+          </p>
+        </div>
+
+        {/* Story cards (desktop) */}
+        <div ref={cardsContainerRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 8 }}>
+          {storyCards.map((card, i) => (
+            <div key={i} className="absolute rounded-3xl border border-white/[0.12] p-5 will-change-transform pointer-events-auto backdrop-blur-xl"
+              style={{ top: card.pos.top, left: card.pos.left, width: 200, background: card.color, animation: `float ${5 + i * 0.8}s ease-in-out infinite`, animationDelay: `${-i * 1.2}s` }}>
+              <p className="museo-label text-white/45 text-[9px] tracking-wider mb-2">{card.label}</p>
+              <p className="museo-body text-white/80 text-xs leading-relaxed">{card.body}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Particles */}
+        <div ref={particlesRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 9 }}>
+          {Array.from({ length: 12 }).map((_, i) => {
+            const size = 3 + Math.random() * 5;
+            return (
+              <div key={i} className="absolute rounded-full will-change-transform"
+                style={{ width: size, height: size, top: `${10 + Math.random() * 80}%`, left: `${5 + Math.random() * 90}%`, background: `rgba(212,187,160,${0.15 + Math.random() * 0.25})`, boxShadow: `0 0 ${size * 2}px rgba(212,187,160,${(0.15 + Math.random() * 0.25) * 0.5})` }} />
+            );
+          })}
+        </div>
+
+        {/* Scroll cue */}
+        <div ref={scrollCueRef} className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 will-change-transform" style={{ zIndex: 11 }}>
+          <p className="museo-label text-white/35 text-[10px]">{t.heroScrollCue}</p>
+          <div className="w-px h-8 bg-gradient-to-b from-white/40 to-transparent" />
+        </div>
+      </div>
+
+      {/* ====== MOBILE: Clean flow layout ====== */}
+      <div ref={mobileContentRef} className="lg:hidden relative flex flex-col items-center px-5 pt-20 pb-8" style={{ zIndex: 5 }}>
+        {/* Nav */}
+        <nav className="w-full flex items-center justify-between mb-8">
+          <div className="museo-label text-white/60 text-xs tracking-widest">{lang === 'zh' ? '高家' : 'GAO FAMILY'}</div>
+          <div className="flex items-center gap-3">
+            <button onClick={toggleLang}
+              className="flex items-center gap-1.5 museo-label text-white/50 text-[10px] tracking-wider border border-white/15 rounded-full px-3 py-1.5">
+              <Globe size={12} />{t.langToggle}
             </button>
-            <button
-              className="lg:hidden text-white/60 hover:text-white transition-colors p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <button className="text-white/60 p-1.5" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </nav>
 
         {/* Headline */}
-        <h1
-          ref={headlineRef}
-          className="museo-headline text-white max-w-3xl will-change-transform mt-2"
-          style={{
-            fontSize: 'clamp(1.6rem, 4.5vw, 3.8rem)',
-            lineHeight: 1.08,
-            textShadow: '0 2px 30px rgba(0,0,0,0.4), 0 8px 60px rgba(0,0,0,0.2)',
-          }}
-        >
+        <h1 className="museo-headline text-white text-center text-3xl mb-2 will-change-transform" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}>
           {t.heroHeadline}
         </h1>
 
         {/* Subheading */}
-        <p
-          ref={subRef}
-          className="museo-body text-white/55 mt-3 max-w-lg will-change-transform"
-          style={{
-            fontSize: 'clamp(0.8rem, 1.3vw, 1.05rem)',
-            fontWeight: 400,
-            textShadow: '0 1px 10px rgba(0,0,0,0.3)',
-          }}
-        >
+        <p className="museo-body text-white/40 text-center text-sm mb-6">
           {t.heroSubheading}
         </p>
-      </div>
 
-      {/* ====== LAYER 7: Story cards (desktop only) ====== */}
-      <div
-        ref={cardsContainerRef}
-        className="absolute inset-0 hidden lg:block pointer-events-none"
-        style={{ zIndex: 8 }}
-      >
-        {storyCards.map((card, i) => (
-          <div
-            key={i}
-            className="absolute rounded-2xl border border-white/[0.12] p-5 will-change-transform pointer-events-auto backdrop-blur-xl"
-            style={{
-              top: card.pos.top,
-              left: card.pos.left,
-              width: 200,
-              background: card.color,
-              animation: `float ${5 + i * 0.8}s ease-in-out infinite`,
-              animationDelay: `${-i * 1.2}s`,
-            }}
-          >
-            <p className="museo-label text-white/45 text-[9px] tracking-wider mb-2">
-              {card.label}
-            </p>
-            <p className="museo-body text-white/80 text-xs leading-relaxed">
-              {card.body}
-            </p>
+        {/* Photo — prominent, full width */}
+        <div className="w-full max-w-sm mb-4">
+          <div className="relative overflow-hidden rounded-xl shadow-lg">
+            <img src="/images/family-hero.jpg" alt="Roy, Chica, Sean and Xiaodai" className="w-full h-auto object-cover" />
           </div>
-        ))}
-      </div>
-
-      {/* Mobile cards — stacked */}
-      <div
-        className="lg:hidden absolute inset-x-0 px-5 flex flex-col gap-3 pointer-events-auto"
-        style={{ zIndex: 8, top: '76%' }}
-      >
-        {storyCards.map((card, i) => (
-          <div
-            key={`m-${i}`}
-            className="rounded-xl border border-white/[0.12] p-4 backdrop-blur-xl will-change-transform"
-            style={{ background: card.color }}
-          >
-            <p className="museo-label text-white/45 text-[9px] tracking-wider mb-1">
-              {card.label}
-            </p>
-            <p className="museo-body text-white/80 text-xs leading-relaxed">
-              {card.body}
-            </p>
+          {/* Studio badge */}
+          <div className="flex justify-center -mt-4">
+            <div className="px-4 py-1.5 rounded-full flex items-center gap-2" style={{ background: 'rgba(196, 168, 130, 0.9)' }}>
+              <Sparkles size={12} className="text-white/80" />
+              <span className="museo-label text-white text-[9px] tracking-wider">三体科创工作室</span>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* ====== LAYER 8: Foreground floating particles ====== */}
-      <div
-        ref={particlesRef}
-        className="absolute inset-0 pointer-events-none hidden lg:block"
-        style={{ zIndex: 9 }}
-      >
-        {Array.from({ length: 12 }).map((_, i) => {
-          const size = 3 + Math.random() * 5;
-          const top = 10 + Math.random() * 80;
-          const left = 5 + Math.random() * 90;
-          const opacity = 0.15 + Math.random() * 0.25;
-          return (
-            <div
-              key={i}
-              className="absolute rounded-full will-change-transform"
-              style={{
-                width: size,
-                height: size,
-                top: `${top}%`,
-                left: `${left}%`,
-                background: `rgba(212, 187, 160, ${opacity})`,
-                boxShadow: `0 0 ${size * 2}px rgba(212,187,160,${opacity * 0.5})`,
-              }}
-            />
-          );
-        })}
-      </div>
+        {/* Story cards — 2x2 grid */}
+        <div className="w-full max-w-sm grid grid-cols-2 gap-2.5 mt-5">
+          {storyCards.map((card, i) => (
+            <div key={`m-${i}`} className="rounded-2xl border border-white/[0.10] p-3 backdrop-blur-lg" style={{ background: card.color }}>
+              <p className="museo-label text-white/45 text-[9px] tracking-wider mb-1">{card.label}</p>
+              <p className="museo-body text-white/75 text-[10px] leading-relaxed">{card.body}</p>
+            </div>
+          ))}
+        </div>
 
-      {/* ====== LAYER 9: Vignette overlay ====== */}
-      <div
-        ref={vignetteRef}
-        className="absolute inset-0 pointer-events-none will-change-transform"
-        style={{
-          zIndex: 10,
-          background: `
-            radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(28,22,18,0.6) 100%)
-          `,
-        }}
-      />
-
-      {/* ====== Scroll cue ====== */}
-      <div
-        ref={scrollCueRef}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 will-change-transform"
-        style={{ zIndex: 11 }}
-      >
-        <p className="museo-label text-white/35 text-[10px]">{t.heroScrollCue}</p>
-        <div className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent" />
+        {/* Scroll cue */}
+        <div className="flex flex-col items-center gap-2 mt-8">
+          <p className="museo-label text-white/30 text-[10px]">{t.heroScrollCue}</p>
+          <div className="w-px h-6 bg-gradient-to-b from-white/30 to-transparent" />
+        </div>
       </div>
 
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 bg-[#1a1612]/95 backdrop-blur-md lg:hidden flex flex-col items-center justify-center">
-          <button
-            className="absolute top-5 right-6 text-white/60 hover:text-white transition-colors p-2"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Close menu"
-          >
+          <button className="absolute top-5 right-6 text-white/60 hover:text-white transition-colors p-2" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
             <X size={28} />
           </button>
           <div className="flex flex-col items-center gap-10">
             {navLinks.map((link, i) => (
-              <a
-                key={i}
-                href={link.href}
-                className="museo-label text-white/70 hover:text-white transition-colors text-2xl"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {link.label}
-              </a>
+              <a key={i} href={link.href} className="museo-label text-white/70 hover:text-white transition-colors text-2xl" onClick={() => setMobileMenuOpen(false)}>{link.label}</a>
             ))}
           </div>
         </div>

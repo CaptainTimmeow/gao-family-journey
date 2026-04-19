@@ -13,6 +13,7 @@ import useCustomCursor from './hooks/useCustomCursor';
 import Hero from './sections/Hero';
 const About = lazy(() => import('./sections/About'));
 const ChildProfiles = lazy(() => import('./sections/ChildProfiles'));
+const MeetTheDog = lazy(() => import('./sections/MeetTheDog'));
 const Exhibitions = lazy(() => import('./sections/Exhibitions'));
 const Collections = lazy(() => import('./sections/Collections'));
 const Testimonials = lazy(() => import('./sections/Testimonials'));
@@ -95,6 +96,9 @@ function App() {
 
         {/* Individual Child Profiles */}
         <ChildProfiles />
+
+        {/* Meet Xiaodai the Dog */}
+        <MeetTheDog />
 
         {/* Exhibitions Section */}
         <Exhibitions />

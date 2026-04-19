@@ -61,12 +61,12 @@ const Footer = () => {
   return (
     <footer ref={footerRef} className="relative w-full bg-[#8c8c91] overflow-hidden">
       {/* Marquee Section */}
-      <div className="py-20 overflow-hidden border-t border-white/10">
+      <div className="py-12 lg:py-20 overflow-hidden border-t border-white/10">
         <div ref={marqueeRef} className="animate-marquee whitespace-nowrap flex will-change-transform">
-          {[...Array(4)].map((_, i) => (
+          {[...Array(2)].map((_, i) => (
             <span
               key={i}
-              className="museo-headline text-white/10 text-[15vw] font-semibold tracking-tight mx-8"
+              className="museo-headline text-white/10 text-[12vw] lg:text-[8vw] font-semibold tracking-tight mx-4 lg:mx-8 flex-shrink-0"
               style={{ WebkitTextStroke: '1px rgba(255,255,255,0.1)' }}
             >
               {t.footerMarquee}

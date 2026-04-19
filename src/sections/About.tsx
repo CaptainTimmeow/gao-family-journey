@@ -16,14 +16,11 @@ const About = () => {
 
   if (!aboutConfig.headline) return null;
 
-  // Translated gallery labels
-  const galleryLabels = [t.galleryLearning, t.galleryFun, t.galleryReading];
-
   // Translated stats
   const stats = [
     { value: '3', label: t.statStudents },
     { value: '1', label: t.statDog },
-    { value: 'K-6', label: t.statSchool },
+    { value: 'G3-4', label: t.statSchool },
   ];
 
   useEffect(() => {
@@ -142,10 +139,10 @@ const About = () => {
     };
   }, []);
 
-  // Split gallery images into 3 columns
-  const col1Images = aboutConfig.galleryImages.filter((_, i) => i % 3 === 0);
-  const col2Images = aboutConfig.galleryImages.filter((_, i) => i % 3 === 1);
-  const col3Images = aboutConfig.galleryImages.filter((_, i) => i % 3 === 2);
+  // Explicit column assignment: left=index0, middle=index1, right=index2
+  const col1Images = aboutConfig.galleryImages.length > 0 ? [aboutConfig.galleryImages[0]] : [];
+  const col2Images = aboutConfig.galleryImages.length > 1 ? [aboutConfig.galleryImages[1]] : [];
+  const col3Images = aboutConfig.galleryImages.length > 2 ? [aboutConfig.galleryImages[2]] : [];
 
   return (
     <section
@@ -176,7 +173,7 @@ const About = () => {
               {col1Images.map((img, i) => (
                 <div key={i} className="gallery-img-wrap overflow-hidden will-change-transform" data-offset={i === 0 ? "60" : "120"}>
                   <img src={img.src} alt={img.alt} className="w-full h-auto object-cover" style={{ aspectRatio: i === 0 ? '3/4' : '4/5' }} />
-                  <p className="museo-label text-white/25 mt-3 text-[10px]">{galleryLabels[i * 3] || img.label}</p>
+                  <p className="museo-label text-white/25 mt-3 text-[10px]">{img.label}</p>
                 </div>
               ))}
             </div>
@@ -186,7 +183,7 @@ const About = () => {
               {col2Images.map((img, i) => (
                 <div key={i} className="gallery-img-wrap overflow-hidden will-change-transform" data-offset={i === 0 ? "80" : "160"}>
                   <img src={img.src} alt={img.alt} className="w-full h-auto object-cover" style={{ aspectRatio: '3/4' }} />
-                  <p className="museo-label text-white/25 mt-3 text-[10px]">{galleryLabels[i * 3 + 1] || img.label}</p>
+                  <p className="museo-label text-white/25 mt-3 text-[10px]">{img.label}</p>
                 </div>
               ))}
             </div>
@@ -196,7 +193,7 @@ const About = () => {
               {col3Images.map((img, i) => (
                 <div key={i} className="gallery-img-wrap overflow-hidden will-change-transform" data-offset={i === 0 ? "40" : "140"}>
                   <img src={img.src} alt={img.alt} className="w-full h-auto object-cover" style={{ aspectRatio: i === 0 ? '4/5' : '3/4' }} />
-                  <p className="museo-label text-white/25 mt-3 text-[10px]">{galleryLabels[i * 3 + 2] || img.label}</p>
+                  <p className="museo-label text-white/25 mt-3 text-[10px]">{img.label}</p>
                 </div>
               ))}
             </div>

@@ -44,6 +44,12 @@
     @apply border-border;
   }
   
+  /* CRITICAL: prevent horizontal overflow on all devices */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
   html {
     scroll-behavior: auto;
   }
@@ -71,8 +77,15 @@
   body {
     @apply bg-[#8c8c91] text-white antialiased;
     font-family: 'Inter', sans-serif;
-    overflow-x: hidden;
-    cursor: none;
+    /* cursor: none only on desktop */
+    cursor: auto;
+  }
+  
+  /* Desktop custom cursor */
+  @media (pointer: fine) {
+    body {
+      cursor: none;
+    }
   }
   
   ::selection {
@@ -99,15 +112,6 @@
   
   .border-museo {
     border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  .clip-reveal {
-    clip-path: inset(0 0 100% 0);
-  }
-  
-  .clip-reveal-active {
-    clip-path: inset(0 0 0% 0);
-    transition: clip-path 1.2s cubic-bezier(0.77, 0, 0.175, 1);
   }
 
   /* Hero scrollytelling components */
@@ -169,23 +173,32 @@
   }
 }
 
-/* Custom cursor styles */
-.custom-cursor {
-  position: fixed;
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  mix-blend-mode: difference;
-  transition: transform 0.15s ease-out, width 0.2s ease, height 0.2s ease;
-  transform: translate(-50%, -50%);
+/* Custom cursor styles — desktop only */
+@media (pointer: fine) {
+  .custom-cursor {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    transition: transform 0.15s ease-out, width 0.2s ease, height 0.2s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .custom-cursor.hover {
+    width: 40px;
+    height: 40px;
+  }
 }
 
-.custom-cursor.hover {
-  width: 40px;
-  height: 40px;
+/* Hide custom cursor on touch devices */
+@media (pointer: coarse) {
+  .custom-cursor {
+    display: none !important;
+  }
 }
 
 /* Marquee animation */
