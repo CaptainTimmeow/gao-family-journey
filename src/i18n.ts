@@ -54,6 +54,18 @@ export interface TranslationSet {
   footerQuickLinks: string;
   footerContact: string;
   langToggle: string;
+  /* Hero scrollytelling keys */
+  heroHeadline: string;
+  heroSubheading: string;
+  heroScrollCue: string;
+  heroCardMilestones: string;
+  heroCardMilestonesLabel: string;
+  heroCardProjects: string;
+  heroCardProjectsLabel: string;
+  heroCardAdventures: string;
+  heroCardAdventuresLabel: string;
+  heroCardXiaodai: string;
+  heroCardXiaodaiLabel: string;
 }
 
 export const translations: Record<Lang, TranslationSet> = {
@@ -108,6 +120,17 @@ export const translations: Record<Lang, TranslationSet> = {
     footerQuickLinks: 'Quick Links',
     footerContact: 'Contact',
     langToggle: '中文',
+    heroHeadline: 'Our life in projects, milestones, and joyful moments',
+    heroSubheading: 'Roy, Chica, Sean, and Xiaodai — Shenzhen, China',
+    heroScrollCue: 'Scroll to explore our story',
+    heroCardMilestones: 'Growing up, one milestone at a time',
+    heroCardMilestonesLabel: 'Milestones',
+    heroCardProjects: 'Building, creating, and learning together',
+    heroCardProjectsLabel: 'Projects',
+    heroCardAdventures: 'Weekend trips, park days, and city explorations',
+    heroCardAdventuresLabel: 'Adventures',
+    heroCardXiaodai: 'Our Shetland Sheepdog and the joy she brings',
+    heroCardXiaodaiLabel: 'Xiaodai Moments',
   },
   zh: {
     title: '高家成长旅程',
@@ -160,5 +183,16 @@ export const translations: Record<Lang, TranslationSet> = {
     footerQuickLinks: '快速链接',
     footerContact: '联系方式',
     langToggle: 'English',
+    heroHeadline: '我们的生活在项目、里程碑和欢乐时光中',
+    heroSubheading: 'Roy, Chica, Sean 和小呆 — 中国深圳',
+    heroScrollCue: '向下滚动探索我们的故事',
+    heroCardMilestones: '一步步成长，一个个里程碑',
+    heroCardMilestonesLabel: '里程碑',
+    heroCardProjects: '一起建造、创造和学习',
+    heroCardProjectsLabel: '项目',
+    heroCardAdventures: '周末旅行、公园时光和城市探索',
+    heroCardAdventuresLabel: '冒险',
+    heroCardXiaodai: '我们的喜乐蒂牧羊犬和她带来的欢乐',
+    heroCardXiaodaiLabel: '小呆时刻',
   },
 };
