@@ -70,10 +70,10 @@ const Collections = () => {
         triggersRef.current.push(dimTrigger);
       });
 
-      // Text reveal inside each card
+      // Text reveal inside each card + parallax
       cards.forEach((card) => {
         const textEls = card.querySelectorAll('.coll-text-el');
-        textEls.forEach((el, i) => {
+        textEls.forEach((el, j) => {
           gsap.set(el, { opacity: 0, y: 30 });
           const trigger = ScrollTrigger.create({
             trigger: card,
@@ -81,12 +81,49 @@ const Collections = () => {
             onEnter: () => {
               gsap.to(el, {
                 opacity: 1, y: 0, duration: 0.7,
-                delay: 0.15 + i * 0.08, ease: 'power3.out',
+                delay: 0.15 + j * 0.08, ease: 'power3.out',
               });
             },
           });
           triggersRef.current.push(trigger);
         });
+
+        // Image parallax within card
+        const img = card.querySelector('img');
+        if (img) {
+          const imgTrigger = ScrollTrigger.create({
+            trigger: card,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+            onUpdate: (self) => {
+              const p = self.progress;
+              gsap.set(img, {
+                y: (p - 0.5) * 50,
+                scale: 1.05,
+              });
+            },
+          });
+          triggersRef.current.push(imgTrigger);
+        }
+
+        // Text block parallax (opposite direction)
+        const textBlock = card.querySelector('.lg\\:col-span-5');
+        if (textBlock) {
+          const textTrigger = ScrollTrigger.create({
+            trigger: card,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.7,
+            onUpdate: (self) => {
+              const p = self.progress;
+              gsap.set(textBlock, {
+                y: (p - 0.5) * -30,
+              });
+            },
+          });
+          triggersRef.current.push(textTrigger);
+        }
       });
     } else if (!hasContent) {
       // Empty state reveal

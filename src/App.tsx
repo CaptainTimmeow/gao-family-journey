@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Suspense, lazy } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './App.css';
@@ -9,14 +9,14 @@ import { useLanguage } from './hooks/useLanguage';
 import useLenis from './hooks/useLenis';
 import useCustomCursor from './hooks/useCustomCursor';
 
-// Sections
+// Sections — Hero loads immediately, everything else lazy
 import Hero from './sections/Hero';
-import About from './sections/About';
-import Exhibitions from './sections/Exhibitions';
-import Collections from './sections/Collections';
-import Testimonials from './sections/Testimonials';
-import Visit from './sections/Visit';
-import Footer from './sections/Footer';
+const About = lazy(() => import('./sections/About'));
+const Exhibitions = lazy(() => import('./sections/Exhibitions'));
+const Collections = lazy(() => import('./sections/Collections'));
+const Testimonials = lazy(() => import('./sections/Testimonials'));
+const Visit = lazy(() => import('./sections/Visit'));
+const Footer = lazy(() => import('./sections/Footer'));
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -82,32 +82,34 @@ function App() {
 
   return (
     <div ref={mainRef} className="relative">
-      {/* Hero Section */}
+      {/* Hero Section — eager load for LCP */}
       <div id="hero-section">
         <Hero />
       </div>
 
-      {/* About Section */}
-      <About />
+      <Suspense fallback={<div className="min-h-[50vh]" />}>
+        {/* About Section */}
+        <About />
 
-      {/* Exhibitions Section */}
-      <Exhibitions />
+        {/* Exhibitions Section */}
+        <Exhibitions />
 
-      {/* Collections Section */}
-      <Collections />
+        {/* Collections Section */}
+        <Collections />
 
-      {/* Testimonials Section */}
-      <div id="testimonials-section">
-        <Testimonials />
-      </div>
+        {/* Testimonials Section */}
+        <div id="testimonials-section">
+          <Testimonials />
+        </div>
 
-      {/* Visit Section */}
-      <Visit />
+        {/* Visit Section */}
+        <Visit />
 
-      {/* Footer */}
-      <div id="footer-section">
-        <Footer />
-      </div>
+        {/* Footer */}
+        <div id="footer-section">
+          <Footer />
+        </div>
+      </Suspense>
     </div>
   );
 }
